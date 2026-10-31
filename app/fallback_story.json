@@ -1,0 +1,26 @@
+[
+  {
+    "scene": "A cold wind howls through a crumbling stone hallway. Torches flicker to life one by one, revealing three paths and a faint growl somewhere in the dark.",
+    "choices": ["Follow the growling sound", "Take the quiet left tunnel", "Grab a torch from the wall"]
+  },
+  {
+    "scene": "A tiny goblin merchant pops out of a barrel, grinning. He offers a glowing potion, a rusty key, and a map that keeps rearranging itself.",
+    "choices": ["Buy the glowing potion", "Trade for the rusty key", "Steal the moving map"]
+  },
+  {
+    "scene": "The floor trembles. A giant stone door slides open, revealing a sleeping dragon curled around a mountain of gold coins.",
+    "choices": ["Tiptoe toward the gold", "Wake the dragon politely", "Sneak back the way you came"]
+  },
+  {
+    "scene": "A ghostly librarian floats between endless shelves. She whispers that one book holds the dungeon's secret, but the wrong one bites.",
+    "choices": ["Pick the red book", "Ask the ghost for a hint", "Read the book that is growling"]
+  },
+  {
+    "scene": "You fall through a hidden trapdoor into a glittering cave of crystals. Something huge is humming a song from deep inside.",
+    "choices": ["Sing along with the humming", "Mine a shiny crystal", "Search for a way up"]
+  },
+  {
+    "scene": "A skeleton knight blocks a narrow bridge over a lava river. He rattles his sword and challenges you to a duel, or a riddle.",
+    "choices": ["Accept the sword duel", "Choose the riddle challenge", "Offer him a bone as a gift"]
+  }
+]
