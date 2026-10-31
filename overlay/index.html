@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>ChatQuest Overlay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Crimson+Pro:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="panel">
+    <header class="panel-header">
+      <span class="logo">⚔ ChatQuest</span>
+      <span class="chapter" id="chapter">Prologue</span>
+    </header>
+
+    <p class="scene" id="scene">The dungeon gates are about to open...</p>
+
+    <div class="status" id="status"></div>
+
+    <ol class="choices" id="choices"></ol>
+
+    <div class="timer"><div class="timer-fill" id="timer-fill"></div></div>
+
+    <footer class="panel-footer">
+      <span id="hint">Type <b>!1</b> <b>!2</b> or <b>!3</b> in chat to vote</span>
+      <span id="meta"></span>
+    </footer>
+  </main>
+  <script src="overlay.js"></script>
+</body>
+</html>

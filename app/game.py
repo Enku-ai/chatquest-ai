@@ -1,75 +1,79 @@
-"""Runs the game: AI writes a scene, chat votes, the winning choice shapes the next scene."""
-import argparse
+"""The game engine: AI writes a scene, chat votes, the winning choice shapes the next scene.
+The overlay reads `engine.state` to show everything on stream."""
 import asyncio
+import traceback
 
 from app.story_ai import Story
 from app.votes import VoteCounter
 
-GRACE_SECONDS = 3  # extra time for viewers watching with stream delay
-
-votes = VoteCounter()
-
-
-async def on_chat_message(username: str, text: str):
-    """Called for every chat message (real or fake)."""
-    if votes.handle_message(username, text):
-        print(f"   vote  {username:<16} {text:<8} tally={votes.tally()}")
+GRACE_SECONDS = 3   # extra time for viewers watching with stream delay
+REVEAL_SECONDS = 6  # how long the winning choice is shown before the next chapter
 
 
-async def run_voting_round(choices: list[str], seconds: int) -> int:
-    votes.start_round(len(choices))
-    print("\n----------- VOTE NOW -----------")
-    for number, choice in enumerate(choices, start=1):
-        print(f"  !{number}  {choice}")
+class GameEngine:
+    def __init__(self, voting_seconds: int = 45):
+        self.voting_seconds = voting_seconds
+        self.votes = VoteCounter()
+        self.story = Story()
+        self.state = {
+            "status": "starting",  # starting -> voting -> reveal -> generating -> voting ...
+            "chapter": 0,
+            "scene": "",
+            "choices": [],
+            "source": "",
+            "tally": [],
+            "total_votes": 0,
+            "seconds_left": 0,
+            "voting_seconds": voting_seconds,
+            "winner": None,
+        }
 
-    for remaining in range(seconds, 0, -1):
-        if remaining % 10 == 0 or remaining <= 5:
-            print(f"   ... {remaining}s left  tally={votes.tally()}")
-        await asyncio.sleep(1)
+    async def on_chat_message(self, username: str, text: str):
+        """Called for every chat message (real or fake)."""
+        if self.votes.handle_message(username, text):
+            self.state["tally"] = self.votes.tally()
+            self.state["total_votes"] = self.votes.total()
+            print(f"   vote  {username:<16} {text:<8} tally={self.state['tally']}")
 
-    print("   Time's up! Accepting late votes...")
-    await asyncio.sleep(GRACE_SECONDS)
-    votes.close()
+    async def run_forever(self):
+        """Play chapter after chapter until the server stops."""
+        scene = await self.story.start()
+        while True:
+            try:
+                self._show_scene(scene)
+                winner = await self._voting_round()
+                chosen = scene["choices"][winner - 1]
 
-    winner = votes.winner()
-    print(f"   RESULT {votes.tally()} from {votes.total()} viewers")
-    print(f"   WINNER: !{winner}  {choices[winner - 1]}")
-    return winner
+                self.state["status"] = "reveal"
+                self.state["winner"] = winner
+                print(f"   WINNER: !{winner}  {chosen}")
+                await asyncio.sleep(REVEAL_SECONDS)
 
+                self.state["status"] = "generating"
+                scene = await self.story.continue_with(chosen)
+            except Exception:
+                traceback.print_exc()  # never let one error kill the live game
+                await asyncio.sleep(3)
 
-def show_scene(chapter: int, scene: dict):
-    print(f"\n########## CHAPTER {chapter}  [{scene['source']}] ##########")
-    print(scene["scene"])
+    def _show_scene(self, scene: dict):
+        self.state.update(
+            chapter=self.story.chapter,
+            scene=scene["scene"],
+            choices=scene["choices"],
+            source=scene["source"],
+            winner=None,
+            tally=[0] * len(scene["choices"]),
+            total_votes=0,
+        )
+        print(f"\n### CHAPTER {self.story.chapter} [{scene['source']}]\n{scene['scene']}")
 
-
-async def main(simulate: bool, seconds: int, rounds: int):
-    if simulate:
-        from app.simulator import run_fake_viewers
-        chat_task = asyncio.create_task(run_fake_viewers(on_chat_message))
-    else:
-        from app.twitch_chat import listen
-        chat_task = asyncio.create_task(listen(on_chat_message))
-
-    story = Story()
-    print("Writing chapter 1...")
-    scene = await story.start()
-
-    for _ in range(rounds):
-        show_scene(story.chapter, scene)
-        winner = await run_voting_round(scene["choices"], seconds)
-        chosen = scene["choices"][winner - 1]
-        print(f"   Writing chapter {story.chapter + 1}...")
-        scene = await story.continue_with(chosen)
-
-    show_scene(story.chapter, scene)
-    chat_task.cancel()
-    print("\nTest finished.")
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--simulate", action="store_true", help="use fake viewers")
-    parser.add_argument("--seconds", type=int, default=45, help="voting time per round")
-    parser.add_argument("--rounds", type=int, default=3, help="how many votes before stopping")
-    args = parser.parse_args()
-    asyncio.run(main(args.simulate, args.seconds, args.rounds))
+    async def _voting_round(self) -> int:
+        self.votes.start_round(len(self.state["choices"]))
+        self.state["status"] = "voting"
+        for remaining in range(self.voting_seconds, 0, -1):
+            self.state["seconds_left"] = remaining
+            await asyncio.sleep(1)
+        self.state["seconds_left"] = 0
+        await asyncio.sleep(GRACE_SECONDS)  # late votes still count
+        self.votes.close()
+        return self.votes.winner()
