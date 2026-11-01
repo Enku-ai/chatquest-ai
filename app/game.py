@@ -31,6 +31,7 @@ class GameEngine:
             "seconds_left": 0,
             "voting_seconds": voting_seconds,
             "winner": None,
+            "trail": [],
         }
 
     # ---------- controls (called from the control panel) ----------
@@ -75,6 +76,7 @@ class GameEngine:
             try:
                 if self._restart:
                     self._restart = False
+                    self.state["trail"] = []
                     self.state["status"] = "generating"
                     print("\n*** NEW ADVENTURE ***")
                     self.announce("🔄 A brand-new adventure begins!")
@@ -89,10 +91,19 @@ class GameEngine:
                 self.state["status"] = "reveal"
                 self.state["winner"] = winner
                 print(f"   WINNER: !{winner}  {chosen}")
-                votes_for_winner = self.votes.tally()[winner - 1]
+                tally = self.votes.tally()
+                total_votes = self.votes.total()
+                votes_for_winner = tally[winner - 1]
+                self.state["trail"].append({
+                    "chapter": self.state["chapter"],
+                    "choice": chosen,
+                    "votes": votes_for_winner,
+                    "total": total_votes,
+                })
+                self.state["trail"] = self.state["trail"][-6:]
                 self.announce(
                     f"⚔️ Chat chose !{winner}: {chosen} "
-                    f"({votes_for_winner}/{self.votes.total()} votes)"
+                    f"({votes_for_winner}/{total_votes} votes)"
                 )
                 await asyncio.sleep(REVEAL_SECONDS)
 

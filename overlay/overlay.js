@@ -5,6 +5,7 @@ const TYPE_MS = 22; // typewriter speed (ms per letter)
 const el = (id) => document.getElementById(id);
 let shownScene = "";
 let typingTimer = null;
+const trailNodes = new Map();
 
 if (new URLSearchParams(location.search).has("preview")) {
   document.body.classList.add("preview");
@@ -49,6 +50,41 @@ function updateChoices(state) {
   });
 }
 
+function updateTrail(trail) {
+  const panel = el("trail-panel");
+  const list = el("trail-list");
+  const entries = Array.isArray(trail) ? trail.slice(-6).reverse() : [];
+  panel.classList.toggle("hidden", entries.length === 0);
+
+  const activeKeys = new Set(entries.map((entry) => JSON.stringify([
+    entry.chapter, entry.choice, entry.votes, entry.total,
+  ])));
+  for (const [key, node] of trailNodes) {
+    if (!activeKeys.has(key)) {
+      node.remove();
+      trailNodes.delete(key);
+    }
+  }
+
+  entries.forEach((entry) => {
+    const key = JSON.stringify([entry.chapter, entry.choice, entry.votes, entry.total]);
+    let item = trailNodes.get(key);
+    if (!item) {
+      item = document.createElement("li");
+      item.className = "trail-entry new";
+      const dot = document.createElement("span");
+      dot.className = "trail-dot";
+      dot.setAttribute("aria-hidden", "true");
+      const copy = document.createElement("span");
+      copy.className = "trail-copy";
+      copy.textContent = `Ch. ${entry.chapter} — ${entry.choice} (${entry.votes}/${entry.total})`;
+      item.append(dot, copy);
+      trailNodes.set(key, item);
+    }
+    list.appendChild(item);
+  });
+}
+
 function render(state) {
   const writing = state.status === "starting" || state.status === "generating";
 
@@ -83,6 +119,7 @@ function render(state) {
   el("hint").style.visibility = voting ? "visible" : "hidden";
   const votesText = `${state.total_votes} vote${state.total_votes === 1 ? "" : "s"}`;
   el("meta").textContent = voting ? `${state.seconds_left}s · ${votesText}` : votesText;
+  updateTrail(state.trail);
 }
 
 async function poll() {

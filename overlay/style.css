@@ -133,4 +133,52 @@ body.preview { background: radial-gradient(circle at 70% 40%, #3a3550, #121018);
 }
 .panel-footer b { color: var(--gold); }
 
+.trail-panel {
+  position: absolute;
+  top: 60px;
+  right: 60px;
+  width: 420px;
+  padding: 26px 28px;
+  background: var(--panel);
+  border: 2px solid var(--gold-dim);
+  border-radius: 18px;
+  box-shadow: 0 0 0 6px rgba(201, 162, 74, 0.15), 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+.trail-panel.hidden { display: none; }
+.trail-title {
+  margin-bottom: 18px;
+  color: var(--gold);
+  font-family: "Cinzel", serif;
+  font-size: 23px;
+  font-weight: 800;
+}
+.trail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  list-style: none;
+}
+.trail-entry {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  color: var(--text);
+  font-size: 22px;
+  line-height: 1.25;
+}
+.trail-dot {
+  flex: 0 0 10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 12px rgba(242, 201, 107, 0.65);
+}
+.trail-copy { flex: 1; }
+.trail-entry.new { animation: trail-enter 0.55s ease-out both; }
+
 @keyframes pulse { 50% { opacity: 0.45; } }
+@keyframes trail-enter {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
