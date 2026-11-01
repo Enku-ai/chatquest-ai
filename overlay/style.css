@@ -35,6 +35,7 @@ body.preview { background: radial-gradient(circle at 70% 40%, #3a3550, #121018);
   border: 2px solid var(--gold-dim);
   border-radius: 18px;
   box-shadow: 0 0 0 6px rgba(201, 162, 74, 0.15), 0 20px 60px rgba(0, 0, 0, 0.6);
+  animation: torchlight 8s ease-in-out infinite alternate;
 }
 
 .panel-header {
@@ -53,6 +54,7 @@ body.preview { background: radial-gradient(circle at 70% 40%, #3a3550, #121018);
   min-height: 210px;
   margin-bottom: 20px;
 }
+.scene.chapter-enter { animation: chapter-enter 0.65s ease-out both; }
 
 .status {
   font-family: "Cinzel", serif;
@@ -82,6 +84,7 @@ body.preview { background: radial-gradient(circle at 70% 40%, #3a3550, #121018);
   overflow: hidden;
   transition: opacity 0.4s, transform 0.4s, box-shadow 0.4s;
 }
+.choice.chapter-enter { animation: chapter-enter 0.55s ease-out both; }
 .choice-bar {
   position: absolute;
   top: 0; bottom: 0; left: 0;
@@ -109,6 +112,18 @@ body.preview { background: radial-gradient(circle at 70% 40%, #3a3550, #121018);
   font-size: 24px;
   color: var(--gold);
 }
+.choice-key, .choice-text, .choice-count { z-index: 2; }
+.choice.winner { animation: winner-flash 0.9s ease-out; }
+.choice.winner::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 20%, rgba(255, 235, 170, 0.55) 48%, transparent 76%);
+  transform: translateX(-110%);
+  animation: winner-shimmer 1s ease-out;
+}
 .choice.loser { opacity: 0.3; }
 .choice.winner {
   transform: scale(1.03);
@@ -123,7 +138,7 @@ body.preview { background: radial-gradient(circle at 70% 40%, #3a3550, #121018);
   margin-bottom: 14px;
 }
 .timer-fill { height: 100%; width: 0; background: var(--bar); transition: width 1s linear; }
-.timer-fill.urgent { background: var(--danger); }
+.timer-fill.urgent { background: var(--danger); animation: timer-pulse 0.8s ease-in-out infinite; }
 
 .panel-footer {
   display: flex;
@@ -148,6 +163,7 @@ body.preview { background: radial-gradient(circle at 70% 40%, #3a3550, #121018);
   border: 2px solid var(--gold-dim);
   border-radius: 18px;
   box-shadow: 0 0 0 6px rgba(201, 162, 74, 0.15), 0 20px 60px rgba(0, 0, 0, 0.6);
+  animation: torchlight 8s ease-in-out infinite alternate;
 }
 .trail-panel.hidden { visibility: hidden; }
 .trail-title, .voter-title {
@@ -203,6 +219,27 @@ body.preview { background: radial-gradient(circle at 70% 40%, #3a3550, #121018);
 .voter-pill.exiting { animation: voter-out 0.32s ease-in both; }
 
 @keyframes pulse { 50% { opacity: 0.45; } }
+@keyframes chapter-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes winner-flash {
+  0% { box-shadow: 0 0 0 3px rgba(242, 201, 107, 0.25), 0 0 8px rgba(242, 201, 107, 0.2); }
+  35% { box-shadow: 0 0 0 4px var(--gold), 0 0 42px rgba(242, 201, 107, 0.9); }
+  100% { box-shadow: 0 0 0 3px var(--gold), 0 0 32px rgba(242, 201, 107, 0.6); }
+}
+@keyframes winner-shimmer {
+  0% { transform: translateX(-110%); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateX(110%); opacity: 0; }
+}
+@keyframes timer-pulse {
+  50% { opacity: 0.55; filter: brightness(1.25); }
+}
+@keyframes torchlight {
+  from { box-shadow: 0 0 0 6px rgba(201, 162, 74, 0.12), 0 20px 60px rgba(0, 0, 0, 0.55); }
+  to { box-shadow: 0 0 0 6px rgba(242, 201, 107, 0.28), 0 20px 60px rgba(0, 0, 0, 0.62); }
+}
 @keyframes trail-enter {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -213,4 +250,12 @@ body.preview { background: radial-gradient(circle at 70% 40%, #3a3550, #121018);
 }
 @keyframes voter-out {
   to { opacity: 0; transform: translateY(-6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
 }

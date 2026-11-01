@@ -23,6 +23,12 @@ function typeScene(text) {
   }, TYPE_MS);
 }
 
+function replayAnimation(node, className) {
+  node.classList.remove(className);
+  void node.offsetWidth;
+  node.classList.add(className);
+}
+
 function buildChoices(choices) {
   const list = el("choices");
   list.replaceChildren();
@@ -144,6 +150,11 @@ function render(state) {
     el("chapter").textContent = `Chapter ${state.chapter}`;
     typeScene(state.scene);
     buildChoices(state.choices);
+    replayAnimation(el("scene"), "chapter-enter");
+    el("choices").querySelectorAll(".choice").forEach((choice, index) => {
+      choice.style.animationDelay = `${index * 70}ms`;
+      replayAnimation(choice, "chapter-enter");
+    });
   }
 
   el("choices").classList.toggle("hidden", writing);
