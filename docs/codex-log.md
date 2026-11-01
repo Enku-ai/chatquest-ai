@@ -75,3 +75,26 @@ it live in OBS.
 
 **Result:** Re-tested in OBS for several rounds: no duplicate names, all trail entries fully
 visible, panels don't overlap. Both bugs fixed.
+
+---
+
+## 4. Animation polish
+
+**Prompt given to Codex:**
+> Smooth fade/slide for new chapters, gold shimmer on the winning choice, pulsing timer in the
+> last 5 seconds, slow torchlight glow on all panels. CSS + vanilla JS only, lightweight for OBS,
+> no backend changes.
+
+**What Codex did:**
+- Scenes and choices fade/slide in for each new chapter.
+- The winning choice flashes and shimmers gold on reveal.
+- The timer bar pulses during its final five seconds.
+- The main and right-side panels get a slow torchlight glow.
+- Kept changes strictly to `overlay/overlay.js` and `overlay/style.css` (2 files, +57 / -1),
+  exactly as the prompt asked — no backend or feature changes.
+
+**My review / testing:**
+- Tested in OBS over several rounds: all four animations work, the trail and voters panels are
+  unaffected, and OBS CPU usage stayed low.
+- Rating: **4.5/5** — precise and stayed inside the requested scope; half a point off because
+  Codex did not run the app itself.
