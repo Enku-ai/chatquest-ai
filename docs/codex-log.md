@@ -28,5 +28,30 @@ it live in OBS.
 - Change size: 4 files, +106 / -6 lines.
 
 **My review / testing:**
-- Reviewed the diff in Codex ("View changes") and with `git diff --stat`.
-- Tested in simulate mode and in OBS: (write the result here after testing)
+- Reviewed the diff in Codex ("View changes") and with `git diff --stat`; only the expected 4 files changed, `.env` untouched.
+- Tested in simulate mode in OBS: the "The Path So Far" panel stays hidden until the first vote ends, then adds one entry per chapter, newest first, and clears on "New adventure".
+- Rating: **4.5/5** — met every requirement and constraint; half a point off because Codex did not run the app itself, so manual testing was needed.
+
+
+---
+
+## 2. Live voter feed
+
+**Goal:** Show viewers' names on stream as they vote, so chat feels seen.
+
+**Prompt given to Codex:**
+> Keep the last 5 counted votes in engine.state["recent_votes"] ({user, choice}, newest first),
+> cleared each voting round. Show them as pill-shaped tags under the trail panel
+> ("goblin_queen → !2") that fade/slide in, without layout jumps. Same style and constraints.
+
+**What Codex did:**
+- `app/game.py` — stores the latest five accepted votes, newest first, reset each round.
+- `overlay/index.html`, `overlay/overlay.js`, `overlay/style.css` — "Recent Voters" feed of pill tags
+  beneath the Adventure Trail; new tags slide in, leaving tags fade out; fixed position so it
+  doesn't jump when the trail is empty.
+- On its own initiative, replaced the overlay's remaining `innerHTML` usage with DOM construction
+  and `textContent`, applying the security constraint to older code too.
+- Change size: 4 files, +110 / -13 lines.
+
+**My review / testing:**
+- (Тест хийсний дараа бичнэ)

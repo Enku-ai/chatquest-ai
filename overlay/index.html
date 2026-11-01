@@ -27,9 +27,15 @@
       <span id="meta"></span>
     </footer>
   </main>
-  <aside class="trail-panel hidden" id="trail-panel" aria-label="The Path So Far">
-    <h2 class="trail-title">The Path So Far</h2>
-    <ol class="trail-list" id="trail-list"></ol>
+  <aside class="side-stack" aria-label="Adventure activity">
+    <section class="trail-panel hidden" id="trail-panel" aria-label="The Path So Far" aria-hidden="true">
+      <h2 class="trail-title">The Path So Far</h2>
+      <ol class="trail-list" id="trail-list"></ol>
+    </section>
+    <section class="voter-panel" aria-label="Recent voters">
+      <h2 class="voter-title">Recent Voters</h2>
+      <ul class="voter-list" id="voter-list" aria-live="polite"></ul>
+    </section>
   </aside>
   <script src="overlay.js"></script>
 </body>

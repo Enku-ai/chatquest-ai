@@ -6,6 +6,7 @@ const el = (id) => document.getElementById(id);
 let shownScene = "";
 let typingTimer = null;
 const trailNodes = new Map();
+let voterItems = [];
 
 if (new URLSearchParams(location.search).has("preview")) {
   document.body.classList.add("preview");
@@ -24,16 +25,22 @@ function typeScene(text) {
 
 function buildChoices(choices) {
   const list = el("choices");
-  list.innerHTML = "";
+  list.replaceChildren();
   choices.forEach((choice, i) => {
     const li = document.createElement("li");
     li.className = "choice";
-    li.innerHTML = `
-      <div class="choice-bar"></div>
-      <span class="choice-key">!${i + 1}</span>
-      <span class="choice-text"></span>
-      <span class="choice-count">0</span>`;
-    li.querySelector(".choice-text").textContent = choice; // safe: no HTML from AI
+    const bar = document.createElement("div");
+    bar.className = "choice-bar";
+    const key = document.createElement("span");
+    key.className = "choice-key";
+    key.textContent = `!${i + 1}`;
+    const text = document.createElement("span");
+    text.className = "choice-text";
+    text.textContent = choice;
+    const count = document.createElement("span");
+    count.className = "choice-count";
+    count.textContent = "0";
+    li.append(bar, key, text, count);
     list.appendChild(li);
   });
 }
@@ -55,6 +62,7 @@ function updateTrail(trail) {
   const list = el("trail-list");
   const entries = Array.isArray(trail) ? trail.slice(-6).reverse() : [];
   panel.classList.toggle("hidden", entries.length === 0);
+  panel.setAttribute("aria-hidden", entries.length === 0 ? "true" : "false");
 
   const activeKeys = new Set(entries.map((entry) => JSON.stringify([
     entry.chapter, entry.choice, entry.votes, entry.total,
@@ -83,6 +91,48 @@ function updateTrail(trail) {
     }
     list.appendChild(item);
   });
+}
+
+function updateRecentVotes(recentVotes) {
+  const list = el("voter-list");
+  const seenUsers = new Set();
+  const entries = (Array.isArray(recentVotes) ? recentVotes : []).filter((entry) => {
+    const userKey = String(entry.user).toLowerCase();
+    if (seenUsers.has(userKey)) return false;
+    seenUsers.add(userKey);
+    return true;
+  }).slice(0, 5);
+  const existingByUser = new Map(voterItems.map((item) => [item.userKey, item]));
+  const nextItems = entries.map((entry) => {
+    const userKey = String(entry.user).toLowerCase();
+    const signature = JSON.stringify([entry.user, entry.choice]);
+    let item = existingByUser.get(userKey);
+    if (item) {
+      existingByUser.delete(userKey);
+      if (item.signature !== signature) {
+        item.node.textContent = `${entry.user} → !${entry.choice}`;
+        item.node.classList.remove("new");
+        void item.node.offsetWidth;
+        item.node.classList.add("new");
+        item.signature = signature;
+      }
+      return item;
+    }
+
+    const node = document.createElement("li");
+    node.className = "voter-pill new";
+    node.textContent = `${entry.user} → !${entry.choice}`;
+    return { userKey, signature, node };
+  });
+
+  existingByUser.forEach((item) => {
+    item.node.classList.remove("new");
+    item.node.classList.add("exiting");
+    setTimeout(() => item.node.remove(), 340);
+  });
+
+  voterItems = nextItems;
+  voterItems.forEach((item) => list.appendChild(item.node));
 }
 
 function render(state) {
@@ -119,7 +169,21 @@ function render(state) {
   el("hint").style.visibility = voting ? "visible" : "hidden";
   const votesText = `${state.total_votes} vote${state.total_votes === 1 ? "" : "s"}`;
   el("meta").textContent = voting ? `${state.seconds_left}s · ${votesText}` : votesText;
+  const voterPanel = document.querySelector(".voter-panel");
+  const voterPanelTopBefore = voterPanel.getBoundingClientRect().top;
   updateTrail(state.trail);
+  updateRecentVotes(state.recent_votes);
+  const voterPanelTopAfter = voterPanel.getBoundingClientRect().top;
+  const verticalShift = voterPanelTopBefore - voterPanelTopAfter;
+  if (verticalShift) {
+    voterPanel.animate(
+      [
+        { transform: `translateY(${verticalShift}px)` },
+        { transform: "translateY(0)" },
+      ],
+      { duration: 350, easing: "ease-out" },
+    );
+  }
 }
 
 async function poll() {

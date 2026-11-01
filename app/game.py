@@ -32,6 +32,7 @@ class GameEngine:
             "voting_seconds": voting_seconds,
             "winner": None,
             "trail": [],
+            "recent_votes": [],
         }
 
     # ---------- controls (called from the control panel) ----------
@@ -65,6 +66,14 @@ class GameEngine:
         if self.votes.handle_message(username, text):
             self.state["tally"] = self.votes.tally()
             self.state["total_votes"] = self.votes.total()
+            choice = self.votes.votes[username.lower()]
+            normalized_username = username.casefold()
+            self.state["recent_votes"] = [
+                vote for vote in self.state["recent_votes"]
+                if vote["user"].casefold() != normalized_username
+            ]
+            self.state["recent_votes"].insert(0, {"user": username, "choice": choice})
+            self.state["recent_votes"] = self.state["recent_votes"][:5]
             print(f"   vote  {username:<16} {text:<8} tally={self.state['tally']}")
 
     # ---------- main loop ----------
@@ -128,6 +137,7 @@ class GameEngine:
         self.announce(f"📜 Chapter {self.story.chapter} — vote now! {options}")
 
     async def _voting_round(self) -> int:
+        self.state["recent_votes"] = []
         self.votes.start_round(len(self.state["choices"]))
         self.state["status"] = "voting"
         self._skip_vote = False

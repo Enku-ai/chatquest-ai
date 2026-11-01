@@ -133,19 +133,24 @@ body.preview { background: radial-gradient(circle at 70% 40%, #3a3550, #121018);
 }
 .panel-footer b { color: var(--gold); }
 
-.trail-panel {
+.side-stack {
   position: absolute;
   top: 60px;
   right: 60px;
   width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.trail-panel, .voter-panel {
   padding: 26px 28px;
   background: var(--panel);
   border: 2px solid var(--gold-dim);
   border-radius: 18px;
   box-shadow: 0 0 0 6px rgba(201, 162, 74, 0.15), 0 20px 60px rgba(0, 0, 0, 0.6);
 }
-.trail-panel.hidden { display: none; }
-.trail-title {
+.trail-panel.hidden { visibility: hidden; }
+.trail-title, .voter-title {
   margin-bottom: 18px;
   color: var(--gold);
   font-family: "Cinzel", serif;
@@ -176,9 +181,36 @@ body.preview { background: radial-gradient(circle at 70% 40%, #3a3550, #121018);
 }
 .trail-copy { flex: 1; }
 .trail-entry.new { animation: trail-enter 0.55s ease-out both; }
+.voter-panel { min-height: 126px; }
+.voter-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  list-style: none;
+}
+.voter-pill {
+  max-width: 100%;
+  padding: 5px 12px;
+  border: 1px solid rgba(201, 162, 74, 0.55);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-size: 19px;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+.voter-pill.new { animation: voter-in 0.4s ease-out both; }
+.voter-pill.exiting { animation: voter-out 0.32s ease-in both; }
 
 @keyframes pulse { 50% { opacity: 0.45; } }
 @keyframes trail-enter {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+@keyframes voter-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes voter-out {
+  to { opacity: 0; transform: translateY(-6px); }
 }
