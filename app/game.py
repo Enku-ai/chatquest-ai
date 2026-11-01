@@ -1,5 +1,5 @@
 """The game engine: AI writes a scene, chat votes, the winning choice shapes the next scene.
-The overlay reads `engine.state` to show everything on stream."""
+The overlay reads `engine.state`; the control panel calls pause/skip/restart."""
 import asyncio
 import traceback
 
@@ -15,8 +15,12 @@ class GameEngine:
         self.voting_seconds = voting_seconds
         self.votes = VoteCounter()
         self.story = Story()
+        self.paused = False
+        self._skip_vote = False
+        self._restart = False
         self.state = {
             "status": "starting",  # starting -> voting -> reveal -> generating -> voting ...
+            "paused": False,
             "chapter": 0,
             "scene": "",
             "choices": [],
@@ -28,6 +32,32 @@ class GameEngine:
             "winner": None,
         }
 
+    # ---------- controls (called from the control panel) ----------
+
+    def pause(self):
+        self.paused = True
+        self.state["paused"] = True
+
+    def resume(self):
+        self.paused = False
+        self.state["paused"] = False
+
+    def skip_vote(self):
+        """End the current vote right now."""
+        self._skip_vote = True
+
+    def restart(self):
+        """Start a brand-new adventure after the current step."""
+        self._restart = True
+        self._skip_vote = True
+        self.resume()
+
+    def set_voting_seconds(self, seconds: int):
+        self.voting_seconds = seconds
+        self.state["voting_seconds"] = seconds
+
+    # ---------- chat ----------
+
     async def on_chat_message(self, username: str, text: str):
         """Called for every chat message (real or fake)."""
         if self.votes.handle_message(username, text):
@@ -35,15 +65,25 @@ class GameEngine:
             self.state["total_votes"] = self.votes.total()
             print(f"   vote  {username:<16} {text:<8} tally={self.state['tally']}")
 
+    # ---------- main loop ----------
+
     async def run_forever(self):
         """Play chapter after chapter until the server stops."""
         scene = await self.story.start()
         while True:
             try:
+                if self._restart:
+                    self._restart = False
+                    self.state["status"] = "generating"
+                    print("\n*** NEW ADVENTURE ***")
+                    scene = await self.story.start()
+
                 self._show_scene(scene)
                 winner = await self._voting_round()
-                chosen = scene["choices"][winner - 1]
+                if self._restart:
+                    continue  # skip the reveal, go straight to the new adventure
 
+                chosen = scene["choices"][winner - 1]
                 self.state["status"] = "reveal"
                 self.state["winner"] = winner
                 print(f"   WINNER: !{winner}  {chosen}")
@@ -70,10 +110,17 @@ class GameEngine:
     async def _voting_round(self) -> int:
         self.votes.start_round(len(self.state["choices"]))
         self.state["status"] = "voting"
-        for remaining in range(self.voting_seconds, 0, -1):
+        self._skip_vote = False
+
+        remaining = self.voting_seconds
+        while remaining > 0 and not self._skip_vote:
             self.state["seconds_left"] = remaining
             await asyncio.sleep(1)
+            if not self.paused:
+                remaining -= 1  # time only runs while not paused
         self.state["seconds_left"] = 0
-        await asyncio.sleep(GRACE_SECONDS)  # late votes still count
+
+        if not self._skip_vote:
+            await asyncio.sleep(GRACE_SECONDS)  # late votes still count
         self.votes.close()
         return self.votes.winner()

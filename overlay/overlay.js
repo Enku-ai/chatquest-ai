@@ -3,7 +3,7 @@ const POLL_MS = 500;
 const TYPE_MS = 22; // typewriter speed (ms per letter)
 
 const el = (id) => document.getElementById(id);
-let shownChapter = -1;
+let shownScene = "";
 let typingTimer = null;
 
 if (new URLSearchParams(location.search).has("preview")) {
@@ -53,8 +53,8 @@ function render(state) {
   const writing = state.status === "starting" || state.status === "generating";
 
   // New chapter arrived: type it out and build fresh choice rows
-  if (!writing && state.chapter !== shownChapter && state.scene) {
-    shownChapter = state.chapter;
+  if (!writing && state.scene !== shownScene && state.scene) {
+    shownScene = state.scene;
     el("chapter").textContent = `Chapter ${state.chapter}`;
     typeScene(state.scene);
     buildChoices(state.choices);
@@ -66,6 +66,8 @@ function render(state) {
   const status = el("status");
   if (writing) {
     status.textContent = "✦ The Dungeon Master is writing… ✦";
+  } else if (state.paused) {
+    status.textContent = "⏸ Paused";
   } else if (state.status === "reveal") {
     status.textContent = `Chat has chosen: ${state.choices[state.winner - 1]}`;
   } else {

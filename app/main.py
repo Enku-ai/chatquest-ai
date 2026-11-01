@@ -45,6 +45,35 @@ def get_state():
     """The overlay asks this every half second."""
     return engine.state
 
+@app.post("/api/control/pause")
+def control_pause():
+    engine.pause()
+    return {"ok": True}
+
+
+@app.post("/api/control/resume")
+def control_resume():
+    engine.resume()
+    return {"ok": True}
+
+
+@app.post("/api/control/skip")
+def control_skip():
+    engine.skip_vote()
+    return {"ok": True}
+
+
+@app.post("/api/control/restart")
+def control_restart():
+    engine.restart()
+    return {"ok": True}
+
+
+@app.post("/api/control/seconds")
+def control_seconds(value: int):
+    value = max(10, min(value, 300))  # keep it between 10 s and 5 min
+    engine.set_voting_seconds(value)
+    return {"ok": True, "seconds": value}
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
