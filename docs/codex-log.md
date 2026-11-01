@@ -54,4 +54,24 @@ it live in OBS.
 - Change size: 4 files, +110 / -13 lines.
 
 **My review / testing:**
-- (Тест хийсний дараа бичнэ)
+- Reviewed the diff in Codex and with `git diff --stat`; 4 expected files changed.
+- Testing in OBS found a bug: a user who changed their vote appeared twice in the feed.
+  I sent Codex a follow-up prompt to keep only each user's latest vote; re-tested and fixed.
+- Bonus: Codex removed the remaining `innerHTML` usage on its own, making the overlay safer.
+- Rating: **4/5** — good feature and a nice security improvement, but missed the duplicate-voter
+  case and did not run the app itself.
+
+---
+
+## 3. Bug fixes found during OBS testing
+
+**Bugs I found:**
+- Recent Voters showed the same user twice when they changed their vote.
+- The Path So Far panel cut off its last entry.
+
+**Prompt given to Codex:**
+> Remove a user's old entry before adding their new vote so each user appears once with their
+> latest choice; make the trail panel grow to fit all entries and push the voters panel down.
+
+**Result:** Re-tested in OBS for several rounds: no duplicate names, all trail entries fully
+visible, panels don't overlap. Both bugs fixed.
