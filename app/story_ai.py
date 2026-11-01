@@ -15,7 +15,7 @@ Twitch chat controls the adventuring party by voting on what to do next.
 
 Rules:
 - Family-friendly: no gore, no sexual content, no real people.
-- Each scene is 2-3 short sentences, at most 60 words, vivid and fun to read aloud on stream.
+- Each scene is 2 short sentences, at most 40 words, vivid and fun to read aloud on stream.
 - React directly to the action chat chose. Choices have real consequences: danger, treasure, allies, twists.
 - Keep the story connected to earlier chapters.
 - Then offer exactly 3 different choices, each at most 6 words, starting with a verb:

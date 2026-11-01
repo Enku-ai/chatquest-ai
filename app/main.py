@@ -26,8 +26,9 @@ async def lifespan(app: FastAPI):
         chat_task = asyncio.create_task(run_fake_viewers(engine.on_chat_message))
         print("Using FAKE viewers (simulate mode)")
     else:
-        from app.twitch_chat import listen
-        chat_task = asyncio.create_task(listen(engine.on_chat_message))
+        from app import twitch_chat
+        engine.announce = twitch_chat.say
+        chat_task = asyncio.create_task(twitch_chat.listen(engine.on_chat_message))
 
     game_task = asyncio.create_task(engine.run_forever())
     print(f"Overlay: http://127.0.0.1:{settings['port']}/overlay/")
@@ -42,8 +43,9 @@ app.mount("/overlay", StaticFiles(directory=OVERLAY_DIR, html=True), name="overl
 
 @app.get("/api/state")
 def get_state():
-    """The overlay asks this every half second."""
+    """The overlay and control panel ask this every second."""
     return engine.state
+
 
 @app.post("/api/control/pause")
 def control_pause():
@@ -74,6 +76,7 @@ def control_seconds(value: int):
     value = max(10, min(value, 300))  # keep it between 10 s and 5 min
     engine.set_voting_seconds(value)
     return {"ok": True, "seconds": value}
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

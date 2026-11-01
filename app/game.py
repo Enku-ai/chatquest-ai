@@ -18,6 +18,7 @@ class GameEngine:
         self.paused = False
         self._skip_vote = False
         self._restart = False
+        self.announce = lambda text: None  # replaced with twitch_chat.say in live mode
         self.state = {
             "status": "starting",  # starting -> voting -> reveal -> generating -> voting ...
             "paused": False,
@@ -76,6 +77,7 @@ class GameEngine:
                     self._restart = False
                     self.state["status"] = "generating"
                     print("\n*** NEW ADVENTURE ***")
+                    self.announce("🔄 A brand-new adventure begins!")
                     scene = await self.story.start()
 
                 self._show_scene(scene)
@@ -87,6 +89,11 @@ class GameEngine:
                 self.state["status"] = "reveal"
                 self.state["winner"] = winner
                 print(f"   WINNER: !{winner}  {chosen}")
+                votes_for_winner = self.votes.tally()[winner - 1]
+                self.announce(
+                    f"⚔️ Chat chose !{winner}: {chosen} "
+                    f"({votes_for_winner}/{self.votes.total()} votes)"
+                )
                 await asyncio.sleep(REVEAL_SECONDS)
 
                 self.state["status"] = "generating"
@@ -106,6 +113,8 @@ class GameEngine:
             total_votes=0,
         )
         print(f"\n### CHAPTER {self.story.chapter} [{scene['source']}]\n{scene['scene']}")
+        options = " | ".join(f"!{i} {c}" for i, c in enumerate(scene["choices"], start=1))
+        self.announce(f"📜 Chapter {self.story.chapter} — vote now! {options}")
 
     async def _voting_round(self) -> int:
         self.votes.start_round(len(self.state["choices"]))
