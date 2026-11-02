@@ -10,7 +10,6 @@
 <body>
   <main class="panel">
     <header class="panel-header">
-      <span class="logo">⚔ ChatQuest</span>
       <span class="chapter" id="chapter">Prologue</span>
     </header>
 
@@ -22,10 +21,6 @@
 
     <div class="timer"><div class="timer-fill" id="timer-fill"></div></div>
 
-    <footer class="panel-footer">
-      <span id="hint">Type <b>!1</b> <b>!2</b> or <b>!3</b> in chat to vote</span>
-      <span id="meta"></span>
-    </footer>
   </main>
   <aside class="side-stack" aria-label="Adventure activity">
     <section class="trail-panel hidden" id="trail-panel" aria-label="The Path So Far" aria-hidden="true">
@@ -37,6 +32,11 @@
       <ul class="voter-list" id="voter-list" aria-live="polite"></ul>
     </section>
   </aside>
+  <footer class="game-banner">
+    <span class="banner-brand">⚔ ChatQuest AI</span>
+    <span class="banner-hint" id="hint">Type <b>!1</b> <b>!2</b> or <b>!3</b> in chat to vote!</span>
+    <span class="banner-meta" id="meta"></span>
+  </footer>
   <script src="overlay.js"></script>
 </body>
 </html>

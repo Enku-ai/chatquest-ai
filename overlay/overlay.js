@@ -11,6 +11,9 @@ let voterItems = [];
 if (new URLSearchParams(location.search).has("preview")) {
   document.body.classList.add("preview");
 }
+if (new URLSearchParams(location.search).has("bg")) {
+  document.body.classList.add("dungeon-bg");
+}
 
 function typeScene(text) {
   clearInterval(typingTimer);

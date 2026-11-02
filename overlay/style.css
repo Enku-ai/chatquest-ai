@@ -18,19 +18,53 @@ html, body {
 }
 
 body {
+  position: relative;
+  isolation: isolate;
   font-family: "Crimson Pro", Georgia, serif;
   color: var(--text);
 }
 
 /* ?preview in the URL shows a dark background for testing in a browser */
 body.preview { background: radial-gradient(circle at 70% 40%, #3a3550, #121018); }
+body.dungeon-bg {
+  background-color: #09080d;
+  background-image:
+    radial-gradient(ellipse at 2% 45%, rgba(201, 101, 42, 0.18), transparent 28%),
+    radial-gradient(ellipse at 98% 45%, rgba(201, 101, 42, 0.16), transparent 28%),
+    radial-gradient(ellipse at 50% 0%, rgba(82, 67, 97, 0.22), transparent 56%),
+    linear-gradient(180deg, rgba(15, 12, 21, 0.78), rgba(5, 5, 9, 0.94)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.012) 0 2px, transparent 2px 96px);
+}
+body.dungeon-bg::before,
+body.dungeon-bg::after {
+  content: "";
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+}
+body.dungeon-bg::before {
+  box-shadow: inset 0 0 180px 42px rgba(0, 0, 0, 0.78);
+}
+body.dungeon-bg::after {
+  opacity: 0.22;
+  background-image:
+    radial-gradient(circle, rgba(255, 190, 91, 0.75) 0 1px, transparent 2px),
+    radial-gradient(circle, rgba(226, 111, 49, 0.65) 0 1px, transparent 2px);
+  background-size: 173px 211px, 257px 283px;
+  background-position: 24px 40px, 102px 120px;
+  animation: ember-drift 18s linear infinite;
+}
 
 .panel {
   position: absolute;
-  left: 60px;
-  top: 60px;
-  width: 860px;
-  padding: 34px 40px 26px;
+  z-index: 1;
+  left: 48px;
+  top: 42px;
+  width: 1150px;
+  max-height: calc(100% - 220px);
+  overflow-y: auto;
+  padding: 34px 42px 32px;
   background: var(--panel);
   border: 2px solid var(--gold-dim);
   border-radius: 18px;
@@ -40,25 +74,24 @@ body.preview { background: radial-gradient(circle at 70% 40%, #3a3550, #121018);
 
 .panel-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: baseline;
   margin-bottom: 20px;
   font-family: "Cinzel", serif;
 }
-.logo { font-size: 30px; font-weight: 800; color: var(--gold); letter-spacing: 2px; }
-.chapter { font-size: 21px; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; }
+.chapter { font-size: 25px; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; }
 
 .scene {
-  font-size: 31px;
-  line-height: 1.4;
-  min-height: 210px;
-  margin-bottom: 20px;
+  font-size: 40px;
+  line-height: 1.34;
+  min-height: 250px;
+  margin-bottom: 24px;
 }
 .scene.chapter-enter { animation: chapter-enter 0.65s ease-out both; }
 
 .status {
   font-family: "Cinzel", serif;
-  font-size: 24px;
+  font-size: 29px;
   color: var(--gold);
   text-align: center;
 }
@@ -68,8 +101,8 @@ body.preview { background: radial-gradient(circle at 70% 40%, #3a3550, #121018);
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-bottom: 22px;
+  gap: 16px;
+  margin-bottom: 28px;
 }
 .choices.hidden { display: none; }
 
@@ -78,7 +111,7 @@ body.preview { background: radial-gradient(circle at 70% 40%, #3a3550, #121018);
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 14px 18px;
+  padding: 20px 24px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.06);
   overflow: hidden;
@@ -97,19 +130,19 @@ body.preview { background: radial-gradient(circle at 70% 40%, #3a3550, #121018);
   position: relative;
   font-family: "Cinzel", serif;
   font-weight: 800;
-  font-size: 23px;
+  font-size: 27px;
   color: #140f1c;
   background: var(--gold);
   border-radius: 8px;
   padding: 3px 12px;
 }
-.choice-text { position: relative; flex: 1; font-size: 29px; font-weight: 600; }
+.choice-text { position: relative; flex: 1; font-size: 36px; font-weight: 600; }
 .choice-count {
   position: relative;
   min-width: 60px;
   text-align: right;
   font-family: "Cinzel", serif;
-  font-size: 24px;
+  font-size: 28px;
   color: var(--gold);
 }
 .choice-key, .choice-text, .choice-count { z-index: 2; }
@@ -140,25 +173,20 @@ body.preview { background: radial-gradient(circle at 70% 40%, #3a3550, #121018);
 .timer-fill { height: 100%; width: 0; background: var(--bar); transition: width 1s linear; }
 .timer-fill.urgent { background: var(--danger); animation: timer-pulse 0.8s ease-in-out infinite; }
 
-.panel-footer {
-  display: flex;
-  justify-content: space-between;
-  font-size: 22px;
-  color: var(--muted);
-}
-.panel-footer b { color: var(--gold); }
-
 .side-stack {
   position: absolute;
-  top: 60px;
-  right: 60px;
-  width: 420px;
+  z-index: 1;
+  top: 42px;
+  right: 48px;
+  width: 560px;
+  max-height: calc(100% - 220px);
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 .trail-panel, .voter-panel {
-  padding: 26px 28px;
+  padding: 30px 32px;
   background: var(--panel);
   border: 2px solid var(--gold-dim);
   border-radius: 18px;
@@ -167,25 +195,25 @@ body.preview { background: radial-gradient(circle at 70% 40%, #3a3550, #121018);
 }
 .trail-panel.hidden { visibility: hidden; }
 .trail-title, .voter-title {
-  margin-bottom: 18px;
+  margin-bottom: 22px;
   color: var(--gold);
   font-family: "Cinzel", serif;
-  font-size: 23px;
+  font-size: 30px;
   font-weight: 800;
 }
 .trail-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 18px;
   list-style: none;
 }
 .trail-entry {
   display: flex;
   align-items: baseline;
-  gap: 12px;
+  gap: 15px;
   color: var(--text);
-  font-size: 22px;
-  line-height: 1.25;
+  font-size: 27px;
+  line-height: 1.28;
 }
 .trail-dot {
   flex: 0 0 10px;
@@ -197,26 +225,68 @@ body.preview { background: radial-gradient(circle at 70% 40%, #3a3550, #121018);
 }
 .trail-copy { flex: 1; }
 .trail-entry.new { animation: trail-enter 0.55s ease-out both; }
-.voter-panel { min-height: 126px; }
+.voter-panel { min-height: 150px; }
 .voter-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 9px;
+  gap: 11px;
   list-style: none;
 }
 .voter-pill {
   max-width: 100%;
-  padding: 5px 12px;
+  padding: 8px 15px;
   border: 1px solid rgba(201, 162, 74, 0.55);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
   color: var(--text);
-  font-size: 19px;
-  line-height: 1.1;
+  font-size: 23px;
+  line-height: 1.15;
   overflow-wrap: anywhere;
 }
 .voter-pill.new { animation: voter-in 0.4s ease-out both; }
 .voter-pill.exiting { animation: voter-out 0.32s ease-in both; }
+
+.game-banner {
+  position: absolute;
+  z-index: 1;
+  left: 40px;
+  right: 40px;
+  bottom: 28px;
+  min-height: 132px;
+  padding: 22px 36px;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  align-items: center;
+  gap: 24px;
+  background: var(--panel);
+  border: 2px solid var(--gold-dim);
+  border-radius: 18px;
+  box-shadow: 0 0 0 6px rgba(201, 162, 74, 0.15), 0 20px 60px rgba(0, 0, 0, 0.6);
+  animation: torchlight 8s ease-in-out infinite alternate;
+}
+.banner-brand {
+  color: var(--gold);
+  font-family: "Cinzel", serif;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+.banner-hint {
+  color: var(--text);
+  font-family: "Cinzel", serif;
+  font-size: 37px;
+  font-weight: 800;
+  text-align: center;
+  white-space: nowrap;
+}
+.banner-hint b { color: var(--gold); }
+.banner-meta {
+  color: var(--muted);
+  font-size: 27px;
+  text-align: right;
+  white-space: nowrap;
+}
 
 @keyframes pulse { 50% { opacity: 0.45; } }
 @keyframes chapter-enter {
@@ -239,6 +309,10 @@ body.preview { background: radial-gradient(circle at 70% 40%, #3a3550, #121018);
 @keyframes torchlight {
   from { box-shadow: 0 0 0 6px rgba(201, 162, 74, 0.12), 0 20px 60px rgba(0, 0, 0, 0.55); }
   to { box-shadow: 0 0 0 6px rgba(242, 201, 107, 0.28), 0 20px 60px rgba(0, 0, 0, 0.62); }
+}
+@keyframes ember-drift {
+  from { transform: translateY(0); }
+  to { transform: translateY(-34px); }
 }
 @keyframes trail-enter {
   from { opacity: 0; transform: translateY(-10px); }
