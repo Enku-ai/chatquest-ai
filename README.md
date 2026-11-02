@@ -97,7 +97,7 @@ python -m app.main --seconds 30
 python -m app.main --simulate --seconds 15
 
 # in a second terminal, the control panel
-streamlit run dashboard/control_panel.py
+python -m streamlit run dashboard/control_panel.py
 ```
 
 **Add the overlay to OBS**
